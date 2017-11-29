@@ -85,12 +85,17 @@ def get_shaders(shape_name):
         current_shader = cmds.ls(cmds.listConnections(cleaned_shading_groups_list[i]), materials=1)
         cmds.select(current_shader)
         cmds.hyperShade(current_shader, objects='')
-        face_assignments = cmds.ls(sl=True)
+        # WRONG_ need to only select faces within shape_name, not all objects
+        face_assignments = cmds.ls(selection=True)
         
+        print face_assignments
+
         for j in range (0, len(face_assignments)):
             face_assignments[j] = str(face_assignments[j])
             face_assignments[j] = re.sub(object_name + ".f", '', face_assignments[j])
         
+        # only want current object here, not multiple objects, and without namespace
+        # return faces even if the it covers whole body, makes code easier later on
         shader_dict[str(cleaned_shading_groups_list[i])] = face_assignments
 
     return shader_dict
@@ -103,13 +108,21 @@ def get_shapes():
         return cmds.listRelatives(cmds.ls(selection=True))
 
 
+# needs to export without namespaces
 def export_shading_json():
     shape_list = get_shapes()
     object_data = {}
     default_arnold_attributes = get_default_arnold_attributes()
 
-    for i in shape_list:
-        object_data[str(i)] = {"shaders": get_shaders(i), "arnold_attributes": get_arnold_attributes(i, default_arnold_attributes)}
+    for shape in shape_list:
+        # find shape namespace
+        object_in_namespace = shape.rpartition(':')[0]
+        # remove shape namespace
+        shape_namespace_stripped = shape.replace(object_in_namespace, "")
+        # remove colon
+        shape_namespace_stripped = shape_namespace_stripped[1:]
+
+        object_data[str(shape_namespace_stripped)] = {"shaders": get_shaders(shape), "arnold_attributes": get_arnold_attributes(shape, default_arnold_attributes)}
 
     filename = str(cmds.fileDialog2(fileFilter="*.json", dialogStyle=2)[0])
     print "filename: ", filename

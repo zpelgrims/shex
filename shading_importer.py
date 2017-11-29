@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 import json
-
+import pymel.core as pm
 
 def load_json():
 
@@ -8,40 +8,68 @@ def load_json():
     return json.load(open(filename))
 
 
-def apply_attributes(shape_node, shading_json):
+def apply_attributes(shape_node, shading_json, namespace):
 
     for i in shading_json[shape_node]["arnold_attributes"]:
-        cmds.setAttr(shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
+        cmds.setAttr(namespace + shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
 
 
-def apply_shaders(shape_node, shading_json):
+def apply_shaders(shape_node, shading_json, namespace):
     
     for i in shading_json[shape_node]["shaders"]:
         for j in range(0, len(shading_json[shape_node]["shaders"][i])):
-            cmds.select(shape_node + ".f" + str(shading_json[shape_node]["shaders"][i][j]), replace=True)
-            cmds.hyperShade(assign = "*:" + str(i))
+            cmds.select(namespace + shape_node + ".f" + str(shading_json[shape_node]["shaders"][i][j]), replace=True)
+            cmds.hyperShade(assign = namespace + str(i))
+
+
 
 
 def get_shapes():
-    return cmds.listRelatives(cmds.ls(selection=True))
+    if (len(cmds.ls(selection=True)) == 0):
+        raise Exception("Select at least one object")
+    else:
+        return cmds.listRelatives(cmds.ls(selection=True))
 
 
 
 def execute():
 
-    shape_node = "pSphereShape1" 
     shading_json = load_json()
     shapes_list = get_shapes()
 
-    if (cmds.checkBox("checkbox_apply_attributes", query = True, value = True)):
-        for shape in shape_list:
-            apply_attributes(shape, shading_json)
-        print "SHADING NODES EXPORTED"
+    bool_apply_arnold_attributes = False
+    bool_apply_shaders = False
 
+    object_namespace_cnt = 1 #replace by slider
+    object_namespace = "*:" * object_namespace_cnt
+    object_in_namespace = ""
+
+    shaders_namespace_cnt = 1
+    shaders_namespace = "*:" * shaders_namespace_cnt
+
+    if (cmds.checkBox("checkbox_apply_attributes", query = True, value = True)):
+        bool_apply_arnold_attributes = True
     if (cmds.checkBox("checkbox_apply_shaders", query = True, value = True)):
-        for shape in shape_list:
-            apply_shaders(shape, shading_json)
-        print "SHADERS APPLIED"
+        bool_apply_shaders = True
+
+
+    for shape in shapes_list:
+        # find shape namespace
+        object_in_namespace = shape.rpartition(':')[0]
+        # remove shape namespace
+        shape_namespace_stripped = shape.replace(object_in_namespace, "")
+        # remove colon
+        shape_namespace_stripped = shape_namespace_stripped[1:]
+        
+        # check if shape in scene exists as shape in json
+        if shape_namespace_stripped in shading_json:
+            if bool_apply_arnold_attributes:
+                apply_attributes(shape_namespace_stripped, shading_json, object_namespace)
+                print "SHADING ATTRIBUTES APPLIED"
+            
+            if bool_apply_shaders:
+                apply_shaders(shape_namespace_stripped, shading_json, shaders_namespace)
+                print "SHADERS APPLIED"
 
 
 def window():
