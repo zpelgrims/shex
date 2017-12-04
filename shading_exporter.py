@@ -85,18 +85,27 @@ def get_shaders(shape_name):
         current_shader = cmds.ls(cmds.listConnections(cleaned_shading_groups_list[i]), materials=1)
         cmds.select(current_shader)
         cmds.hyperShade(current_shader, objects='')
-        # WRONG_ need to only select faces within shape_name, not all objects
         face_assignments = cmds.ls(selection=True)
-        
-        print face_assignments
+        cleaned_face_assignments = ""
 
         for j in range (0, len(face_assignments)):
             face_assignments[j] = str(face_assignments[j])
             face_assignments[j] = re.sub(object_name + ".f", '', face_assignments[j])
         
-        # only want current object here, not multiple objects, and without namespace
-        # return faces even if the it covers whole body, makes code easier later on
-        shader_dict[str(cleaned_shading_groups_list[i])] = face_assignments
+        # remove all other shapes that came with the hypershade material selection
+        for k in face_assignments:
+            if str(shape_name) in k:
+                cleaned_face_assignments = k
+        
+        # remove namespace
+        # find shape namespace
+        object_in_namespace = cleaned_face_assignments.rpartition(':')[0]
+        # remove shape namespace
+        shape_namespace_stripped = cleaned_face_assignments.replace(object_in_namespace, "")
+        # remove colon
+        shape_namespace_stripped = shape_namespace_stripped[1:]
+
+        shader_dict[str(cleaned_shading_groups_list[i])] = shape_namespace_stripped
 
     return shader_dict
 
