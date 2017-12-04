@@ -102,10 +102,19 @@ def get_shaders(shape_name):
 
 
 def get_shapes():
-    if (len(cmds.ls(selection=True)) == 0):
+    shapes_list = cmds.ls(selection=True, dag=True, geometry=True)
+    cleaned_shapes_list = []
+
+    # remove curve shapes
+    for i in shapes_list:
+        if ("curve" not in i) and ("Orig" not in i):
+            cleaned_shapes_list.append(i)
+
+    if len(cleaned_shapes_list) == 0:
         raise Exception("Select at least one object")
     else:
-        return cmds.listRelatives(cmds.ls(selection=True))
+        print cleaned_shapes_list
+        return cleaned_shapes_list
 
 
 # needs to export without namespaces
@@ -122,6 +131,7 @@ def export_shading_json():
         # remove colon
         shape_namespace_stripped = shape_namespace_stripped[1:]
 
+        print shape
         object_data[str(shape_namespace_stripped)] = {"shaders": get_shaders(shape), "arnold_attributes": get_arnold_attributes(shape, default_arnold_attributes)}
 
     filename = str(cmds.fileDialog2(fileFilter="*.json", dialogStyle=2)[0])
