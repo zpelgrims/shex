@@ -48,16 +48,16 @@ def execute():
     bool_apply_arnold_attributes = False
     bool_apply_shaders = False
 
-    object_namespace_cnt = 1 #replace by slider
+    object_namespace_cnt = cmds.intSliderGrp('slider_object_namespaces', query = True, value = True)
     object_namespace = "*:" * object_namespace_cnt
-    object_in_namespace = ""
-
-    shaders_namespace_cnt = 1
+    shaders_namespace_cnt = cmds.intSliderGrp('slider_shaders_namespaces', query = True, value = True)
     shaders_namespace = "*:" * shaders_namespace_cnt
 
-    if (cmds.checkBox("checkbox_apply_attributes", query = True, value = True)):
+    object_in_namespace = ""
+
+    if (cmds.checkBox('checkbox_apply_attributes', query = True, value = True)):
         bool_apply_arnold_attributes = True
-    if (cmds.checkBox("checkbox_apply_shaders", query = True, value = True)):
+    if (cmds.checkBox('checkbox_apply_shaders', query = True, value = True)):
         bool_apply_shaders = True
 
 
@@ -94,6 +94,8 @@ def window():
 
 
     cmds.columnLayout( "mainColumn", adj=True )
+    cmds.intSliderGrp('slider_object_namespaces', field=True, label='object_namespaces', minValue=0, maxValue=3, fieldMinValue=0, fieldMaxValue=10, value=1)
+    cmds.intSliderGrp('slider_shaders_namespaces', field=True, label='shaders_namespaces', minValue=0, maxValue=3, fieldMinValue=0, fieldMaxValue=10, value=1)
     cmds.checkBox("checkbox_apply_attributes", height=buttonSize[1], label = "apply_attributes", value = 0, parent = "mainColumn")
     cmds.checkBox("checkbox_apply_shaders", height=buttonSize[1], label = "apply_shaders", value = 0, parent = "mainColumn")
     cmds.button( label='Execute', height=buttonSize[1], parent = "mainColumn", command=("execute()"))
