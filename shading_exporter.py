@@ -84,7 +84,7 @@ def get_shaders(shape_name, object_namespace):
 
     # remove initialShadingGroup
     for sg in cleaned_shading_groups_list:
-        if sg == "initialShadingGroup":
+        if (sg == "initialShadingGroup") or (object_namespace in sg):
             cleaned_shading_groups_list.remove(sg)
 
 
