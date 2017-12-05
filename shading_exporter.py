@@ -155,16 +155,35 @@ def get_shapes():
 
 # needs to export without namespaces
 def export_shading_json():
-    object_namespace = pm.selected()[0].namespace()
     shape_list = get_shapes()
     object_data = {}
     default_arnold_attributes = get_default_arnold_attributes()
 
+    namespace_list = []
+
+    for shape in shape_list:
+        cmds.select(shape)
+        namespace = pm.selected()[0].namespace()
+
+        if namespace not in namespace_list:
+            namespace_list.append(namespace)
+
+
     for shape in shape_list:
         # strip namespace for writing to json
-        shape_namespace_stripped = shape.replace(object_namespace, "")
+        for namespace in namespace_list:
+            if namespace in shape:
+                shape_namespace_stripped = shape.replace(namespace, "")
+                current_namespace = namespace
 
-        object_data[str(shape_namespace_stripped)] = {"shaders": get_shaders(shape, object_namespace), "arnold_attributes": get_arnold_attributes(shape, default_arnold_attributes)}
+        # query data type
+        datatype = str(cmds.objectType(shape))
+
+        if datatype == "mesh":
+            object_data[str(shape_namespace_stripped)] = {"shaders": get_shaders(shape, current_namespace), "arnold_attributes": get_arnold_attributes(shape, default_arnold_attributes)}
+        elif datatype == "xgmSplineDescription":
+            object_data[str(shape_namespace_stripped)] = {"shaders": get_shaders(shape, current_namespace), "arnold_attributes": get_arnold_hair_attributes(shape)}
+
 
     filename = str(cmds.fileDialog2(fileFilter="*.json", dialogStyle=2)[0])
     print "filename: ", filename
