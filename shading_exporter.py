@@ -1,8 +1,10 @@
 import maya.cmds as cmds
+import pymel.core as pm
 import json
 import io
 import re
 import sys
+
 
 try:
     to_unicode = unicode
@@ -68,7 +70,7 @@ def get_arnold_attributes(shape_name, default_arnold_attributes):
     return non_default_arnold_attributes
 
 
-def get_shaders(shape_name):
+def get_shaders(shape_name, object_namespace):
 
     object_name = str(cmds.listRelatives(shape_name, parent=True)[0])
     shader_dict = {}
@@ -93,29 +95,20 @@ def get_shaders(shape_name):
         face_assignments = cmds.ls(selection=True)
         cleaned_face_assignments = []
 
-        """
+        """ not sure why i did this, old
         for j in range (0, len(face_assignments)):
             face_assignments[j] = str(face_assignments[j])
             face_assignments[j] = re.sub(object_name + ".f", '', face_assignments[j])
         """
-        
 
-        
-        # when there is a face based selection it is in the form "transform.f[0:n]", so shape node isn't found and added
         # remove all other shapes that came with the hypershade material selection
         for k in face_assignments:
             if str(object_name) in k:
                 cleaned_face_assignments.append(str(k))
         
-        """
-        # remove namespace
-        # find shape namespace
-        object_in_namespace = cleaned_face_assignments.rpartition(':')[0]
-        # remove shape namespace
-        shape_namespace_stripped = cleaned_face_assignments.replace(object_in_namespace, "")
-        # remove colon
-        shape_namespace_stripped = shape_namespace_stripped[1:]
-        """
+        # remove namespace when writing to json
+        for f in range (0, len(cleaned_face_assignments)):
+            cleaned_face_assignments[f] = cleaned_face_assignments[f].replace(object_namespace, "")
 
         shader_dict[str(cleaned_shading_groups_list[i])] = cleaned_face_assignments
 
@@ -126,34 +119,29 @@ def get_shapes():
     shapes_list = cmds.ls(selection=True, dag=True, geometry=True)
     cleaned_shapes_list = []
 
-    # remove curve shapes
+    # remove curve and intermediate shapes
     for i in shapes_list:
         if ("curve" not in i) and ("Orig" not in i):
             cleaned_shapes_list.append(i)
 
     if len(cleaned_shapes_list) == 0:
-        raise Exception("Select at least one object")
+        raise Exception("Select at least one valid object")
     else:
-        print cleaned_shapes_list
         return cleaned_shapes_list
 
 
 # needs to export without namespaces
 def export_shading_json():
+    object_namespace = pm.selected()[0].namespace()
     shape_list = get_shapes()
     object_data = {}
     default_arnold_attributes = get_default_arnold_attributes()
 
     for shape in shape_list:
-        # find shape namespace
-        object_in_namespace = shape.rpartition(':')[0]
-        # remove shape namespace
-        shape_namespace_stripped = shape.replace(object_in_namespace, "")
-        # remove colon
-        shape_namespace_stripped = shape_namespace_stripped[1:]
+        # strip namespace for writing to json
+        shape_namespace_stripped = shape.replace(object_namespace, "")
 
-        print shape
-        object_data[str(shape_namespace_stripped)] = {"shaders": get_shaders(shape), "arnold_attributes": get_arnold_attributes(shape, default_arnold_attributes)}
+        object_data[str(shape_namespace_stripped)] = {"shaders": get_shaders(shape, object_namespace), "arnold_attributes": get_arnold_attributes(shape, default_arnold_attributes)}
 
     filename = str(cmds.fileDialog2(fileFilter="*.json", dialogStyle=2)[0])
     print "filename: ", filename
