@@ -80,23 +80,34 @@ def get_shaders(shape_name):
     cleaned_shader_list = list(set(shaders))
     cleaned_shading_groups_list = list(set(shading_groups))
 
+    # remove initialShadingGroup
+    for sg in cleaned_shading_groups_list:
+        if sg == "initialShadingGroup":
+            cleaned_shading_groups_list.remove(sg)
+
 
     for i in range (0, len(cleaned_shading_groups_list)):
         current_shader = cmds.ls(cmds.listConnections(cleaned_shading_groups_list[i]), materials=1)
         cmds.select(current_shader)
         cmds.hyperShade(current_shader, objects='')
         face_assignments = cmds.ls(selection=True)
-        cleaned_face_assignments = ""
+        cleaned_face_assignments = []
 
+        """
         for j in range (0, len(face_assignments)):
             face_assignments[j] = str(face_assignments[j])
             face_assignments[j] = re.sub(object_name + ".f", '', face_assignments[j])
+        """
         
+
+        
+        # when there is a face based selection it is in the form "transform.f[0:n]", so shape node isn't found and added
         # remove all other shapes that came with the hypershade material selection
         for k in face_assignments:
-            if str(shape_name) in k:
-                cleaned_face_assignments = k
+            if str(object_name) in k:
+                cleaned_face_assignments.append(str(k))
         
+        """
         # remove namespace
         # find shape namespace
         object_in_namespace = cleaned_face_assignments.rpartition(':')[0]
@@ -104,8 +115,9 @@ def get_shaders(shape_name):
         shape_namespace_stripped = cleaned_face_assignments.replace(object_in_namespace, "")
         # remove colon
         shape_namespace_stripped = shape_namespace_stripped[1:]
+        """
 
-        shader_dict[str(cleaned_shading_groups_list[i])] = shape_namespace_stripped
+        shader_dict[str(cleaned_shading_groups_list[i])] = cleaned_face_assignments
 
     return shader_dict
 
