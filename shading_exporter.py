@@ -13,8 +13,6 @@ import sys
 # either give unique names
 
 
-# export arnold attributes of xgen differently, cant be comparing attributes to a cube! Just write them all out
-
 try:
     to_unicode = unicode
 except NameError:
