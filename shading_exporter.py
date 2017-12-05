@@ -79,6 +79,23 @@ def get_arnold_attributes(shape_name, default_arnold_attributes):
     return non_default_arnold_attributes
 
 
+def get_arnold_hair_attributes(shape_name):
+
+    arnold_attribute_names = cmds.listAttr(shape_name, read=True, scalar=True, st=['ai*'])
+    
+    arnold_attributes = []
+    non_default_arnold_attributes = {}
+
+    for i in arnold_attribute_names:
+        arnold_attributes.append( (str(i), cmds.getAttr(shape_name + "." + i)) )
+    
+    for i in range (0, len(arnold_attributes)):
+        non_default_arnold_attributes[str(arnold_attributes[i][0])] = arnold_attributes[i][1]
+        print shape_name, " >> (", arnold_attributes[i][0], ", ", arnold_attributes[i][1], ")"
+
+    return non_default_arnold_attributes
+
+
 def get_shaders(shape_name, object_namespace):
 
     object_name = str(cmds.listRelatives(shape_name, parent=True)[0])
