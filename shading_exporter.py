@@ -5,6 +5,15 @@ import io
 import re
 import sys
 
+# there's a bug when there's multiple shape nodes in one mesh, can't handle that
+# sometimes it takes multiple objects per shader, due to:
+# desc_ponytail_left_out
+#   "desc_ponytail_left_out_extra_Shape", "desc_ponytail_left_out_stray_Shape", "desc_ponytail_left_outShape", "desc_ponytail_left_out_extra02_Shape"
+# name is in every description
+# either give unique names
+
+
+# export arnold attributes of xgen differently, cant be comparing attributes to a cube! Just write them all out
 
 try:
     to_unicode = unicode
@@ -95,15 +104,12 @@ def get_shaders(shape_name, object_namespace):
         face_assignments = cmds.ls(selection=True)
         cleaned_face_assignments = []
 
-        """ not sure why i did this, old
-        for j in range (0, len(face_assignments)):
-            face_assignments[j] = str(face_assignments[j])
-            face_assignments[j] = re.sub(object_name + ".f", '', face_assignments[j])
-        """
-
         # remove all other shapes that came with the hypershade material selection
         for k in face_assignments:
-            if str(object_name) in k:
+            # ------------- BUG!
+            # possibility of multiple shapes here, this is wrong!!!!
+            # the object name can be found in multiple shapes
+            if (str(object_name) in k) or (str(shape_name) in k):
                 cleaned_face_assignments.append(str(k))
         
         # remove namespace when writing to json

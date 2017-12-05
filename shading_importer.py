@@ -18,17 +18,25 @@ def apply_shaders(shape_node, shading_json, namespace):
     
     for i in shading_json[shape_node]["shaders"]:
         for j in range(0, len(shading_json[shape_node]["shaders"][i])):
-            cmds.select(namespace + shape_node + ".f" + str(shading_json[shape_node]["shaders"][i][j]), replace=True)
+            cmds.select(namespace + str(shading_json[shape_node]["shaders"][i][j]), replace=True)
             cmds.hyperShade(assign = namespace + str(i))
 
 
 
 
 def get_shapes():
-    if (len(cmds.ls(selection=True)) == 0):
-        raise Exception("Select at least one object")
+    shapes_list = cmds.ls(selection=True, dag=True, geometry=True)
+    cleaned_shapes_list = []
+
+    # remove curve and intermediate shapes
+    for i in shapes_list:
+        if ("curve" not in i) and ("Orig" not in i):
+            cleaned_shapes_list.append(i)
+
+    if len(cleaned_shapes_list) == 0:
+        raise Exception("Select at least one valid object")
     else:
-        return cmds.listRelatives(cmds.ls(selection=True))
+        return cleaned_shapes_list
 
 
 
@@ -60,6 +68,9 @@ def execute():
         shape_namespace_stripped = shape.replace(object_in_namespace, "")
         # remove colon
         shape_namespace_stripped = shape_namespace_stripped[1:]
+
+
+        print shape_namespace_stripped
         
         # check if shape in scene exists as shape in json
         if shape_namespace_stripped in shading_json:
