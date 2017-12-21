@@ -1,9 +1,5 @@
 import maya.cmds as cmds
-
-def select_objects(object_names):
-    cmds.select(object_names)
-    return cmds.ls(selection=True)
-
+import mtoa.aovs as aovs
 
 def set_render_settings():
     cmds.setAttr("defaultArnoldDriver.halfPrecision", True)
@@ -21,12 +17,8 @@ def set_render_settings():
 
 
 def create_default_aovs():
-    import mtoa.aovs as aovs
 
-    # merge aovs into single exr by default
-    cmds.setAttr("defaultArnoldDriver.mergeAOVs", True)
-
-    defaultAOVlist = ["crypto_material", "crypto_object", "P", "N", "Z", "coat", "specular", "diffuse", "direct", "indirect", "sss", "transmission"]
+    defaultAOVlist = ["P", "N", "Z", "coat", "specular", "diffuse", "direct", "indirect", "sss", "transmission"]
     currentAOVlist = aovs.AOVInterface().getAOVNodes(names=True)
 
     for i in defaultAOVlist:
@@ -43,7 +35,6 @@ def create_default_aovs():
 
 
 def create_custom_aovs(char):
-    import mtoa.aovs as aovs
 
     if char == "girl":
         customAOVlist = ["mask_lips", "mask_lips_smear", "mask_tattoo", "mask_makeup_graphic", "mask_makeup_graphic_sharp", "mask_eyebrows"]
