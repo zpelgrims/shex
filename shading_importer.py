@@ -20,7 +20,7 @@ def apply_curve_attributes(shape_node, shading_json, namespace):
         if (i != "curve_shader"):
             cmds.setAttr(namespace + shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
         else:
-            cmds.connectAttr(shading_json[shape_node]["arnold_attributes"][i] + ".outColor", namespace + shape_node + ".aiCurveShader")
+            cmds.connectAttr(namespace + shading_json[shape_node]["arnold_attributes"][i][0] + ".outColor", namespace + shape_node + ".aiCurveShader", force=True)
 
 def apply_shaders(shape_node, shading_json, namespace):
     
@@ -42,6 +42,7 @@ def get_shapes():
         if ("curve" not in i) and ("Orig" not in i):
             cleaned_shapes_list.append(i)
     """
+
     # remove intermediate shapes
     for i in shapes_list:
         if "Orig" not in i:
@@ -105,17 +106,28 @@ def execute():
 
 def window():
     windowName = "shading_importer"
-    windowSize = (400, 100)
-    buttonSize = (100, 20)
+    windowSize = (400, 250)
+    buttonSize = (100, 30)
 
     if (cmds.window(windowName , exists=True)):
         cmds.deleteUI(windowName)
     window = cmds.window( windowName, title= windowName, widthHeight=windowSize, sizeable=0)
 
+    cmds.columnLayout( "mainColumn", adj=True )
+    cmds.text(label='HOW TO USE:')
+    cmds.text(label='1. reference in animation (.abc)')
+    cmds.text(label='2. reference in published shading (.ma)')
+    cmds.text(label='3. set appropriate amount of namespaces [usually 1]')
+    cmds.text(label='4. select top level transform of alembic')
 
+    cmds.separator( height=20, style='double' )
+    
     cmds.columnLayout( "mainColumn", adj=True )
     cmds.intSliderGrp('slider_object_namespaces', field=True, label='object_namespaces', minValue=0, maxValue=3, fieldMinValue=0, fieldMaxValue=10, value=1)
     cmds.intSliderGrp('slider_shaders_namespaces', field=True, label='shaders_namespaces', minValue=0, maxValue=3, fieldMinValue=0, fieldMaxValue=10, value=1)
+
+    cmds.separator( height=20, style='double' )
+
     cmds.checkBox("checkbox_apply_attributes", height=buttonSize[1], label = "apply_attributes", value = 0, parent = "mainColumn")
     cmds.checkBox("checkbox_apply_shaders", height=buttonSize[1], label = "apply_shaders", value = 0, parent = "mainColumn")
     cmds.button( label='Execute', height=buttonSize[1], parent = "mainColumn", command=("execute()"))

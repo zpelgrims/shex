@@ -128,8 +128,9 @@ def get_arnold_curve_attributes(shape_name, default_arnold_attributes):
             if arnold_attributes[i][0] == default_arnold_attributes[i][0]:
                 # if attribute value changed
                 if arnold_attributes[i][1] != default_arnold_attributes[i][1]:
-                    non_default_arnold_attributes[str(arnold_attributes[i][0])] = arnold_attributes[i][1]
-                    print shape_name, " >> (", arnold_attributes[i][0], ", ", arnold_attributes[i][1], ")"
+                    if (arnold_attributes[i][0] != "aiCurveShaderR") and (arnold_attributes[i][0] != "aiCurveShaderG") and (arnold_attributes[i][0] != "aiCurveShaderB"):
+                        non_default_arnold_attributes[str(arnold_attributes[i][0])] = arnold_attributes[i][1]
+                        print shape_name, " >> (", arnold_attributes[i][0], ", ", arnold_attributes[i][1], ")"
 
     # add curve shader
     non_default_arnold_attributes["curve_shader"] = cmds.listConnections(shape_name + ".aiCurveShader")
@@ -261,7 +262,6 @@ def window():
     if (cmds.window(windowName , exists=True)):
         cmds.deleteUI(windowName)
     window = cmds.window( windowName, title= windowName, widthHeight=windowSize, sizeable=0)
-
 
     cmds.columnLayout( "mainColumn", adj=True )
     cmds.checkBox("checkbox_export_shading_nodes", height=buttonSize[1], label = "export_shading_nodes", value = 0, parent = "mainColumn")
