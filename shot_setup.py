@@ -37,7 +37,7 @@ def create_default_aovs():
 def create_custom_aovs(char):
 
     if char == "girl":
-        customAOVlist = ["mask_lips", "mask_lips_smear", "mask_tattoo", "mask_makeup_graphic", "mask_makeup_graphic_sharp", "mask_eyebrows"]
+        customAOVlist = ["mask_lips", "mask_lips_smear", "mask_tattoo", "mask_makeup_graphic", "mask_makeup_graphic_sharp", "mask_eyebrows", "mask_facing_ratio"]
     elif char == "man":
         customAOVlist = []
     elif char == "transvestite":
@@ -45,7 +45,7 @@ def create_custom_aovs(char):
     elif char == "manager":
         customAOVlist = []
     
-    currentAOVlist = aovs.AOVInterface().getAOVNodes(object_namesmes=True)
+    currentAOVlist = aovs.AOVInterface().getAOVNodes(names=True)
         
     for i in customAOVlist:
         currentAOVlist = aovs.AOVInterface().getAOVNodes(names=True)
@@ -59,181 +59,11 @@ def create_custom_aovs(char):
             aovs.AOVInterface().addAOV(i, aovType='rgba')
             print "AOV [" + i + "] has been added"
 
-"""
-# ISSUE: doesn't work for referenced curves since they can't be re-parented
-def create_curvecollectors_boots():
-
-    # BOOT LINES
-    shapeName = "aicc_bootLines_back_blueShape"
-    cmds.createNode("aiCurveCollector", n=shapeName)
-    cmds.setAttr(shapeName + ".aiCurveWidth", 0.0375)
-
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseTransmission", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInVolume", 0)
-    cmds.setAttr(shapeName + ".castsShadows", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularTransmission", 0)
-    cmds.setAttr(shapeName + ".aiSelfShadows", 0)
-    cmds.setAttr(shapeName + ".aiOpaque", 0)
-
-    cmds.connectAttr("*:mat_boots_line_blue.outColor", shapeName + ".aiCurveShader", f=True)
-
-    curveName = ["*:bootBack_blue_r_curve", "*:bootBack_blue_l_curve"]
-    for i in curveName:
-        cmds.parent(i, shapeName)
+    # connect facing ratio shader
+    if char == "girl":
+        cmds.connectAttr("*:mat_aov_facingratio.outColor", "aiAOV_mask_facing_ratio.defaultValue", force=True)
 
 
-
-    # BOOT LINES
-    shapeName = "aicc_bootLines_blackShape"
-    cmds.createNode("aiCurveCollector", n=shapeName)
-    cmds.setAttr(shapeName + ".aiCurveWidth", 0.02)
-
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseTransmission", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInVolume", 0)
-    cmds.setAttr(shapeName + ".castsShadows", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularTransmission", 0)
-    cmds.setAttr(shapeName + ".aiSelfShadows", 0)
-    cmds.setAttr(shapeName + ".aiOpaque", 0)
-
-    cmds.connectAttr("*:mat_boots_line_black.outColor", shapeName + ".aiCurveShader", f=True)
-
-    curveName = ["*:bootBack_black01_l_curve", "*:bootBack_black02_l_curve", "*:bootBack_black01_r_curve", "*:bootBack_black02_r_curve", "*:bootBack_black03_r_curve"]
-    for i in curveName:
-        cmds.parent(i, shapeName)
-
-
-
-    # BOOT LINES
-    shapeName = "aicc_bootLines_black_longShape"
-    cmds.createNode("aiCurveCollector", n=shapeName)
-    cmds.setAttr(shapeName + ".aiCurveWidth", 0.02)
-
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseTransmission", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInVolume", 0)
-    cmds.setAttr(shapeName + ".castsShadows", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularTransmission", 0)
-    cmds.setAttr(shapeName + ".aiSelfShadows", 0)
-    cmds.setAttr(shapeName + ".aiOpaque", 0)
-
-    cmds.connectAttr("*:mat_boots_line_black_long.outColor", shapeName + ".aiCurveShader", f=True)
-
-    curveName = ["*:bootBackLong_black_r_curve"]
-    for i in curveName:
-        cmds.parent(i, shapeName)
-
-
-# ISSUE: doesn't work for referenced curves since they can't be re-parented
-def create_curvecollectors_bra():
-
-    # BRA LINES
-    shapeName = "aicc_top_strap_longShape"
-    cmds.createNode("aiCurveCollector", n=shapeName)
-    cmds.setAttr(shapeName + ".aiCurveWidth", 0.1)
-
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseTransmission", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInVolume", 0)
-    cmds.setAttr(shapeName + ".castsShadows", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularTransmission", 0)
-    cmds.setAttr(shapeName + ".aiSelfShadows", 0)
-    cmds.setAttr(shapeName + ".aiOpaque", 0)
-
-    cmds.connectAttr("*:mat_top_strap_long.outColor", shapeName + ".aiCurveShader", f=True)
-
-    curveName = ["*:braStrapShoulder_r_curve"]
-    for i in curveName:
-        cmds.parent(i, shapeName)
-
-
-
-    shapeName = "aicc_top_strap_front_sideShape"
-    cmds.createNode("aiCurveCollector", n=shapeName)
-    cmds.setAttr(shapeName + ".aiCurveWidth", 0.06)
-
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseTransmission", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInVolume", 0)
-    cmds.setAttr(shapeName + ".castsShadows", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularTransmission", 0)
-    cmds.setAttr(shapeName + ".aiSelfShadows", 0)
-    cmds.setAttr(shapeName + ".aiOpaque", 0)
-
-    cmds.connectAttr("*:mat_top_strap_front_side.outColor", shapeName + ".aiCurveShader", f=True)
-
-    curveName = ["*:braStrapSide_l_curve", "*:braStrapFront_c_curve", "*:braStrapSide_r_curve"]
-    for i in curveName:
-        cmds.parent(i, shapeName)
-
-
-
-    shapeName = "aicc_top_strap_short_backShape"
-    cmds.createNode("aiCurveCollector", n=shapeName)
-    cmds.setAttr(shapeName + ".aiCurveWidth", 0.06)
-
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseTransmission", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInVolume", 0)
-    cmds.setAttr(shapeName + ".castsShadows", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularTransmission", 0)
-    cmds.setAttr(shapeName + ".aiSelfShadows", 0)
-    cmds.setAttr(shapeName + ".aiOpaque", 0)
-
-    cmds.connectAttr("*:mat_top_strap_short_back.outColor", shapeName + ".aiCurveShader", f=True)
-
-    curveName = ["*:braStrapBack_l_curve", "*:braStrapBack_r_curve", "*:braStrapBackBottom_r_curve", "*:braStrapBackBottom_l_curve"]
-    for i in curveName:
-        cmds.parent(i, shapeName)
-
-
-
-    shapeName = "aicc_top_strap_bottomShape"
-    cmds.createNode("aiCurveCollector", n=shapeName)
-    cmds.setAttr(shapeName + ".aiCurveWidth", 0.06)
-
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseTransmission", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInVolume", 0)
-    cmds.setAttr(shapeName + ".castsShadows", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularTransmission", 0)
-    cmds.setAttr(shapeName + ".aiSelfShadows", 0)
-    cmds.setAttr(shapeName + ".aiOpaque", 0)
-
-    cmds.connectAttr("*:mat_top_strap_bottom.outColor", shapeName + ".aiCurveShader", f=True)
-
-    curveName = ["*:braStrapBottom_c_curve"]
-    for i in curveName:
-        cmds.parent(i, shapeName)
-
-
-    shapeName = "aicc_top_strap_long_var1Shape"
-    cmds.createNode("aiCurveCollector", n=shapeName)
-    cmds.setAttr(shapeName + ".aiCurveWidth", 0.1)
-
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInDiffuseTransmission", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInVolume", 0)
-    cmds.setAttr(shapeName + ".castsShadows", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularReflection", 0)
-    cmds.setAttr(shapeName + ".aiVisibleInSpecularTransmission", 0)
-    cmds.setAttr(shapeName + ".aiSelfShadows", 0)
-    cmds.setAttr(shapeName + ".aiOpaque", 0)
-
-    cmds.connectAttr("*:mat_top_strap_long_var1.outColor", shapeName + ".aiCurveShader", f=True)
-
-    curveName = ["*:braStrapShoulder_l_curve"]
-    for i in curveName:
-        cmds.parent(i, shapeName)
-"""
 
 def execute():
     if (cmds.checkBox("checkbox_set_render_settings", query = True, value = True)):
@@ -248,15 +78,6 @@ def execute():
         create_custom_aovs("girl")
         print "CUSTOM AOVS COMPLETE"
 
-    """
-    if (cmds.checkBox("checkbox_create_curvecollectors_boots", query = True, value = True)):
-        create_curvecollectors_boots()
-        print "BOOTS CURVECOLLECTORS COMPLETE"
-
-    if (cmds.checkBox("checkbox_create_curvecollectors_bra", query = True, value = True)):
-        create_curvecollectors_bra()
-        print "BRA CURVECOLLECTORS COMPLETE"
-    """
 
 
 def window():
