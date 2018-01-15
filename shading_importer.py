@@ -14,6 +14,14 @@ def apply_attributes(shape_node, shading_json, namespace):
         cmds.setAttr(namespace + shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
 
 
+def apply_curve_attributes(shape_node, shading_json, namespace):
+
+    for i in shading_json[shape_node]["arnold_attributes"]:
+        if (i != "curve_shader"):
+            cmds.setAttr(namespace + shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
+        else:
+            cmds.connectAttr(shading_json[shape_node]["arnold_attributes"][i] + ".outColor", namespace + shape_node + ".aiCurveShader")
+
 def apply_shaders(shape_node, shading_json, namespace):
     
     for i in shading_json[shape_node]["shaders"]:
@@ -28,9 +36,15 @@ def get_shapes():
     shapes_list = cmds.ls(selection=True, dag=True, geometry=True)
     cleaned_shapes_list = []
 
+    """
     # remove curve and intermediate shapes
     for i in shapes_list:
         if ("curve" not in i) and ("Orig" not in i):
+            cleaned_shapes_list.append(i)
+    """
+    # remove intermediate shapes
+    for i in shapes_list:
+        if "Orig" not in i:
             cleaned_shapes_list.append(i)
 
     if len(cleaned_shapes_list) == 0:
@@ -69,17 +83,23 @@ def execute():
         # remove colon
         shape_namespace_stripped = shape_namespace_stripped[1:]
 
-
         print shape_namespace_stripped
+
+        # query data type
+        datatype = str(cmds.objectType(shape))
         
         # check if shape in scene exists as shape in json
         if shape_namespace_stripped in shading_json:
             if bool_apply_arnold_attributes:
-                apply_attributes(shape_namespace_stripped, shading_json, object_namespace)
+                if (datatype != "nurbsCurve"):
+                    apply_attributes(shape_namespace_stripped, shading_json, object_namespace)
+                else: #special treatment for nurbs curves
+                    apply_curve_attributes(shape_namespace_stripped, shading_json, object_namespace)
                 print "SHADING ATTRIBUTES APPLIED"
             
             if bool_apply_shaders:
-                apply_shaders(shape_namespace_stripped, shading_json, shaders_namespace)
+                if (datatype != "nurbsCurve"):
+                    apply_shaders(shape_namespace_stripped, shading_json, shaders_namespace)
                 print "SHADERS APPLIED"
 
 

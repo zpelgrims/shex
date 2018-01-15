@@ -24,7 +24,6 @@ def export_shading_nodes():
     # "*" to only select nodes without namespace
     material_list = cmds.ls("*", materials=True)
     cmds.select(material_list)
-    
     sg_list = cmds.ls("*", sets=True)
     cmds.select(sg_list, ne=True, add=True)
     
@@ -38,7 +37,7 @@ def export_shading_nodes():
         cmds.file( filename[0], type='mayaAscii', es=True )
 
 
-def get_default_arnold_attributes():
+def get_default_arnold_mesh_attributes():
     # create temporary object to write out always-up-to-date arnold attribute list
     default_object = cmds.polyCube(n="tmp_default_cube")
     default_object_shape = str(default_object[0]) + "Shape" 
@@ -52,6 +51,23 @@ def get_default_arnold_attributes():
     cmds.delete(default_object)
 
     return default_arnold_attributes
+
+
+def get_default_arnold_curve_attributes():
+    # create temporary curve to write out always-up-to-date arnold attribute list
+    default_object = cmds.curve(n="tmp_default_curve", p=[(0, 0, 0), (3, 5, 6), (5, 6, 7), (9, 9, 9)])
+    default_object_shape = str(cmds.listRelatives(default_object, shapes=True)[0])
+
+    default_arnold_attribute_names = cmds.listAttr(default_object_shape, read=True, scalar=True, st=['*ai*'])
+    default_arnold_attributes = []
+
+    for i in default_arnold_attribute_names:
+        default_arnold_attributes.append( (str(i), cmds.getAttr(default_object_shape + "." + i)) )
+
+    cmds.delete(default_object)
+
+    return default_arnold_attributes
+
 
 
 def get_arnold_attributes(shape_name, default_arnold_attributes):
@@ -94,11 +110,38 @@ def get_arnold_hair_attributes(shape_name):
     return non_default_arnold_attributes
 
 
+
+def get_arnold_curve_attributes(shape_name, default_arnold_attributes):
+
+    arnold_attribute_names = cmds.listAttr(shape_name, read=True, scalar=True, st=['*ai*'])
+    arnold_attributes = []
+    non_default_arnold_attributes = {}
+
+    for i in arnold_attribute_names:
+        arnold_attributes.append( (str(i), cmds.getAttr(shape_name + "." + i)) )
+        
+    # amount of attributes needs to be equal
+    if len(arnold_attribute_names) == len(default_arnold_attributes):
+        for i in range (0, len(arnold_attributes)):
+            
+            # attribute names need to be equal
+            if arnold_attributes[i][0] == default_arnold_attributes[i][0]:
+                # if attribute value changed
+                if arnold_attributes[i][1] != default_arnold_attributes[i][1]:
+                    non_default_arnold_attributes[str(arnold_attributes[i][0])] = arnold_attributes[i][1]
+                    print shape_name, " >> (", arnold_attributes[i][0], ", ", arnold_attributes[i][1], ")"
+
+    # add curve shader
+    non_default_arnold_attributes["curve_shader"] = cmds.listConnections(shape_name + ".aiCurveShader")
+
+    return non_default_arnold_attributes
+
+
+
 def get_shaders(shape_name, object_namespace):
 
     object_name = str(cmds.listRelatives(shape_name, parent=True)[0])
     shader_dict = {}
-
 
     shading_groups = cmds.listConnections(shape_name, type='shadingEngine')
     shaders = cmds.ls(cmds.listConnections(shading_groups), materials=1) 
@@ -140,9 +183,16 @@ def get_shapes():
     shapes_list = cmds.ls(selection=True, dag=True, geometry=True)
     cleaned_shapes_list = []
 
+    """
     # remove curve and intermediate shapes
     for i in shapes_list:
         if ("curve" not in i) and ("Orig" not in i):
+            cleaned_shapes_list.append(i)
+    """
+
+    # remove intermediate shapes
+    for i in shapes_list:
+        if "Orig" not in i:
             cleaned_shapes_list.append(i)
 
     if len(cleaned_shapes_list) == 0:
@@ -155,10 +205,10 @@ def get_shapes():
 def export_shading_json():
     shape_list = get_shapes()
     object_data = {}
-    default_arnold_attributes = get_default_arnold_attributes()
+    default_arnold_mesh_attributes = get_default_arnold_mesh_attributes()
+    default_arnold_curve_attributes = get_default_arnold_curve_attributes()
 
     namespace_list = []
-
     for shape in shape_list:
         cmds.select(shape)
         namespace = pm.selected()[0].namespace()
@@ -178,10 +228,11 @@ def export_shading_json():
         datatype = str(cmds.objectType(shape))
 
         if datatype == "mesh":
-            object_data[str(shape_namespace_stripped)] = {"shaders": get_shaders(shape, current_namespace), "arnold_attributes": get_arnold_attributes(shape, default_arnold_attributes)}
+            object_data[str(shape_namespace_stripped)] = {"shaders": get_shaders(shape, current_namespace), "arnold_attributes": get_arnold_attributes(shape, default_arnold_mesh_attributes)}
         elif datatype == "xgmSplineDescription":
             object_data[str(shape_namespace_stripped)] = {"shaders": get_shaders(shape, current_namespace), "arnold_attributes": get_arnold_hair_attributes(shape)}
-
+        elif datatype == "nurbsCurve":
+            object_data[str(shape_namespace_stripped)] = {"arnold_attributes": get_arnold_curve_attributes(shape, default_arnold_curve_attributes)}
 
     filename = str(cmds.fileDialog2(fileFilter="*.json", dialogStyle=2)[0])
     print "filename: ", filename

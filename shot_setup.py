@@ -59,7 +59,7 @@ def create_custom_aovs(char):
             aovs.AOVInterface().addAOV(i, aovType='rgba')
             print "AOV [" + i + "] has been added"
 
-
+"""
 # ISSUE: doesn't work for referenced curves since they can't be re-parented
 def create_curvecollectors_boots():
 
@@ -233,7 +233,7 @@ def create_curvecollectors_bra():
     curveName = ["*:braStrapShoulder_l_curve"]
     for i in curveName:
         cmds.parent(i, shapeName)
-
+"""
 
 def execute():
     if (cmds.checkBox("checkbox_set_render_settings", query = True, value = True)):
