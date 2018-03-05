@@ -30,6 +30,10 @@ def export_shading_nodes():
     # remove default sets since they get picked up automatically with the shading groups
     cmds.select("defaultLightSet", ne=True, deselect=True)
     cmds.select("defaultObjectSet", ne=True, deselect=True)
+
+    # manually select all ramps, using them in the curve attributes
+    ramp_list = cmds.ls("*ramp*")
+    cmds.select(ramp_list, ne=True, add=True)
     
     selection = cmds.ls(sl=True)
     if selection:
@@ -43,6 +47,8 @@ def get_default_arnold_mesh_attributes():
     default_object_shape = str(default_object[0]) + "Shape" 
 
     default_arnold_attribute_names = cmds.listAttr(default_object_shape, read=True, scalar=True, st=['*ai*'])
+    default_arnold_attribute_names.append("castsShadows")
+    default_arnold_attribute_names.append("smoothShading")
     default_arnold_attributes = []
 
     for i in default_arnold_attribute_names:
@@ -59,6 +65,8 @@ def get_default_arnold_curve_attributes():
     default_object_shape = str(cmds.listRelatives(default_object, shapes=True)[0])
 
     default_arnold_attribute_names = cmds.listAttr(default_object_shape, read=True, scalar=True, st=['*ai*'])
+    default_arnold_attribute_names.append("castsShadows")
+
     default_arnold_attributes = []
 
     for i in default_arnold_attribute_names:
@@ -73,6 +81,11 @@ def get_default_arnold_curve_attributes():
 def get_arnold_attributes(shape_name, default_arnold_attributes):
 
     arnold_attribute_names = cmds.listAttr(shape_name, read=True, scalar=True, st=['*ai*'])
+    # need to append the other attributes too, eg castShadows, smoothShading
+    arnold_attribute_names.append("castsShadows")
+    arnold_attribute_names.append("smoothShading")
+
+
     arnold_attributes = []
     non_default_arnold_attributes = {}
 
@@ -96,7 +109,9 @@ def get_arnold_attributes(shape_name, default_arnold_attributes):
 def get_arnold_hair_attributes(shape_name):
 
     arnold_attribute_names = cmds.listAttr(shape_name, read=True, scalar=True, st=['ai*'])
-    
+    arnold_attribute_names.append("faceCamera")
+    arnold_attribute_names.append("castsShadows")
+
     arnold_attributes = []
     non_default_arnold_attributes = {}
 
@@ -114,6 +129,7 @@ def get_arnold_hair_attributes(shape_name):
 def get_arnold_curve_attributes(shape_name, default_arnold_attributes):
 
     arnold_attribute_names = cmds.listAttr(shape_name, read=True, scalar=True, st=['*ai*'])
+    arnold_attribute_names.append("castsShadows")
     arnold_attributes = []
     non_default_arnold_attributes = {}
 
@@ -134,6 +150,7 @@ def get_arnold_curve_attributes(shape_name, default_arnold_attributes):
 
     # add curve shader
     non_default_arnold_attributes["curve_shader"] = cmds.listConnections(shape_name + ".aiCurveShader")
+    non_default_arnold_attributes["curve_width"] = cmds.listConnections(shape_name + ".aiCurveWidth")
 
     return non_default_arnold_attributes
 

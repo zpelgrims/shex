@@ -17,10 +17,15 @@ def apply_attributes(shape_node, shading_json, namespace):
 def apply_curve_attributes(shape_node, shading_json, namespace):
 
     for i in shading_json[shape_node]["arnold_attributes"]:
-        if (i != "curve_shader"):
-            cmds.setAttr(namespace + shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
-        else:
+        if (i == "curve_shader"):
             cmds.connectAttr(namespace + shading_json[shape_node]["arnold_attributes"][i][0] + ".outColor", namespace + shape_node + ".aiCurveShader", force=True)
+        elif (i == "curve_width"):
+            print shading_json[shape_node]["arnold_attributes"][i]
+            if ( shading_json[shape_node]["arnold_attributes"][i] != None ):
+                print "still happening"
+                cmds.connectAttr(namespace + shading_json[shape_node]["arnold_attributes"][i][0] + ".outAlpha", namespace + shape_node + ".aiCurveWidth", force=True)
+        else:
+            cmds.setAttr(namespace + shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
 
 def apply_shaders(shape_node, shading_json, namespace):
     
