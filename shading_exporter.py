@@ -161,6 +161,8 @@ def get_shaders(shape_name, object_namespace):
     object_name = str(cmds.listRelatives(shape_name, parent=True)[0])
     shader_dict = {}
 
+    print object_name
+
     shading_groups = cmds.listConnections(shape_name, type='shadingEngine')
     shaders = cmds.ls(cmds.listConnections(shading_groups), materials=1) 
 

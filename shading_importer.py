@@ -22,7 +22,6 @@ def apply_curve_attributes(shape_node, shading_json, namespace):
         elif (i == "curve_width"):
             print shading_json[shape_node]["arnold_attributes"][i]
             if ( shading_json[shape_node]["arnold_attributes"][i] != None ):
-                print "still happening"
                 cmds.connectAttr(namespace + shading_json[shape_node]["arnold_attributes"][i][0] + ".outAlpha", namespace + shape_node + ".aiCurveWidth", force=True)
         else:
             cmds.setAttr(namespace + shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
