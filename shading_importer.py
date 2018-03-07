@@ -20,7 +20,7 @@ def apply_curve_attributes(shape_node, shading_json, namespace):
         if (i == "curve_shader"):
             cmds.connectAttr(namespace + shading_json[shape_node]["arnold_attributes"][i][0] + ".outColor", namespace + shape_node + ".aiCurveShader", force=True)
         elif (i == "curve_width"):
-            print shading_json[shape_node]["arnold_attributes"][i]
+            #print shading_json[shape_node]["arnold_attributes"][i]
             if ( shading_json[shape_node]["arnold_attributes"][i] != None ):
                 cmds.connectAttr(namespace + shading_json[shape_node]["arnold_attributes"][i][0] + ".outAlpha", namespace + shape_node + ".aiCurveWidth", force=True)
         else:
@@ -88,7 +88,7 @@ def execute():
         # remove colon
         shape_namespace_stripped = shape_namespace_stripped[1:]
 
-        print shape_namespace_stripped
+        # print shape_namespace_stripped
 
         # query data type
         datatype = str(cmds.objectType(shape))
@@ -100,12 +100,25 @@ def execute():
                     apply_attributes(shape_namespace_stripped, shading_json, object_namespace)
                 else: #special treatment for nurbs curves
                     apply_curve_attributes(shape_namespace_stripped, shading_json, object_namespace)
-                print "SHADING ATTRIBUTES APPLIED"
+                print "SHADING ATTRIBUTES APPLIED >>", shape
             
             if bool_apply_shaders:
                 if (datatype != "nurbsCurve"):
                     apply_shaders(shape_namespace_stripped, shading_json, shaders_namespace)
-                print "SHADERS APPLIED"
+                print "SHADERS APPLIED >>", shape
+
+
+    # check which objects still have the initialshadinggroup assigned
+    for shape in shapes_list:
+        datatype = str(cmds.objectType(shape))
+        if (datatype != "nurbsCurve"):
+            shading_groups = cmds.listConnections(shape, type='shadingEngine')
+            shaders = cmds.ls(cmds.listConnections(shading_groups), materials=1)
+
+            for i in shading_groups:
+                if (i == "initialShadingGroup"):
+                    print "SHADING IMPORT WARNING: initialShadingGroup still assigned to >>", shape
+
 
 
 def window():
