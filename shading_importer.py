@@ -14,17 +14,16 @@ def apply_attributes(shape_node, shading_json, namespace):
         cmds.setAttr(namespace + shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
 
 
-def apply_curve_attributes(shape_node, shading_json, namespace):
+def apply_curve_attributes(shape_node, shading_json, shape_namespace, shaders_namespace):
 
     for i in shading_json[shape_node]["arnold_attributes"]:
         if (i == "curve_shader"):
-            cmds.connectAttr(namespace + shading_json[shape_node]["arnold_attributes"][i][0] + ".outColor", namespace + shape_node + ".aiCurveShader", force=True)
+            cmds.connectAttr(shaders_namespace + shading_json[shape_node]["arnold_attributes"][i][0] + ".outColor", shape_namespace + shape_node + ".aiCurveShader", force=True)
         elif (i == "curve_width"):
-            #print shading_json[shape_node]["arnold_attributes"][i]
             if ( shading_json[shape_node]["arnold_attributes"][i] != None ):
-                cmds.connectAttr(namespace + shading_json[shape_node]["arnold_attributes"][i][0] + ".outAlpha", namespace + shape_node + ".aiCurveWidth", force=True)
+                cmds.connectAttr(shaders_namespace + shading_json[shape_node]["arnold_attributes"][i][0] + ".outAlpha", shape_namespace + shape_node + ".aiCurveWidth", force=True)
         else:
-            cmds.setAttr(namespace + shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
+            cmds.setAttr(shape_namespace + shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
 
 def apply_shaders(shape_node, shading_json, namespace):
     
@@ -67,8 +66,6 @@ def execute():
     bool_apply_arnold_attributes = False
     bool_apply_shaders = False
 
-    object_namespace_cnt = cmds.intSliderGrp('slider_object_namespaces', query = True, value = True)
-    object_namespace = "*:" * object_namespace_cnt
     shaders_namespace_cnt = cmds.intSliderGrp('slider_shaders_namespaces', query = True, value = True)
     shaders_namespace = "*:" * shaders_namespace_cnt
 
@@ -81,6 +78,11 @@ def execute():
 
 
     for shape in shapes_list:
+        
+        # find object namespace
+        cmds.select(shape)
+        object_namespace = pm.selected()[0].namespace()
+
         # find shape namespace
         object_in_namespace = shape.rpartition(':')[0]
         # remove shape namespace
@@ -88,7 +90,6 @@ def execute():
         # remove colon
         shape_namespace_stripped = shape_namespace_stripped[1:]
 
-        # print shape_namespace_stripped
 
         # query data type
         datatype = str(cmds.objectType(shape))
@@ -99,7 +100,7 @@ def execute():
                 if (datatype != "nurbsCurve"):
                     apply_attributes(shape_namespace_stripped, shading_json, object_namespace)
                 else: #special treatment for nurbs curves
-                    apply_curve_attributes(shape_namespace_stripped, shading_json, object_namespace)
+                    apply_curve_attributes(shape_namespace_stripped, shading_json, object_namespace, shaders_namespace)
                 print "SHADING ATTRIBUTES APPLIED >>", shape
             
             if bool_apply_shaders:
@@ -107,7 +108,7 @@ def execute():
                     apply_shaders(shape_namespace_stripped, shading_json, shaders_namespace)
                 print "SHADERS APPLIED >>", shape
 
-
+    """
     # check which objects still have the initialshadinggroup assigned
     for shape in shapes_list:
         datatype = str(cmds.objectType(shape))
@@ -118,7 +119,9 @@ def execute():
             for i in shading_groups:
                 if (i == "initialShadingGroup"):
                     print "SHADING IMPORT WARNING: initialShadingGroup still assigned to >>", shape
+    """
 
+    print "ALL SHADERS APPLIED"
 
 
 def window():
@@ -140,7 +143,6 @@ def window():
     cmds.separator( height=20, style='double' )
     
     cmds.columnLayout( "mainColumn", adj=True )
-    cmds.intSliderGrp('slider_object_namespaces', field=True, label='object_namespaces', minValue=0, maxValue=3, fieldMinValue=0, fieldMaxValue=10, value=1)
     cmds.intSliderGrp('slider_shaders_namespaces', field=True, label='shaders_namespaces', minValue=0, maxValue=3, fieldMinValue=0, fieldMaxValue=10, value=1)
 
     cmds.separator( height=20, style='double' )

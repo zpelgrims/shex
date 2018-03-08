@@ -133,6 +133,11 @@ def get_arnold_curve_attributes(shape_name, default_arnold_attributes):
     arnold_attributes = []
     non_default_arnold_attributes = {}
 
+    # if shader is connected to curvewidth, do not add the aiCurveWidth attribute.. once it is locked can't overwrite it with value
+    curve_width_export = False
+    if (cmds.listConnections(shape_name + ".aiCurveWidth") == None):
+        curve_width_export = True
+
     for i in arnold_attribute_names:
         arnold_attributes.append( (str(i), cmds.getAttr(shape_name + "." + i)) )
         
@@ -145,11 +150,15 @@ def get_arnold_curve_attributes(shape_name, default_arnold_attributes):
                 # if attribute value changed
                 if arnold_attributes[i][1] != default_arnold_attributes[i][1]:
                     if (arnold_attributes[i][0] != "aiCurveShaderR") and (arnold_attributes[i][0] != "aiCurveShaderG") and (arnold_attributes[i][0] != "aiCurveShaderB"):
+                        if (arnold_attributes[i][0] == "aiCurveWidth") and (curve_width_export == False):
+                            continue
                         non_default_arnold_attributes[str(arnold_attributes[i][0])] = arnold_attributes[i][1]
                         print shape_name, " >> (", arnold_attributes[i][0], ", ", arnold_attributes[i][1], ")"
 
-    # add curve shader
+    # add curve shader and width
     non_default_arnold_attributes["curve_shader"] = cmds.listConnections(shape_name + ".aiCurveShader")
+
+    
     non_default_arnold_attributes["curve_width"] = cmds.listConnections(shape_name + ".aiCurveWidth")
 
     return non_default_arnold_attributes
