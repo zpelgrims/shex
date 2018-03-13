@@ -4,7 +4,7 @@ import pymel.core as pm
 
 def load_json():
 
-    filename = str(cmds.fileDialog2(fileFilter="*.json", dialogStyle=2)[0])
+    filename = str(cmds.fileDialog2(fileFilter="*.json", fileMode=1, dialogStyle=1)[0])
     return json.load(open(filename))
 
 
