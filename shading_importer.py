@@ -147,7 +147,7 @@ def window():
     namespaces = cmds.namespaceInfo(listOnlyNamespaces=True, recurse=True)
 
     for i in namespaces:
-        if "hading" in i:
+        if "had" in i:
             cmds.menuItem(label=i)
 
     cmds.separator( height=20, style='double' )
