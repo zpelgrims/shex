@@ -124,7 +124,7 @@ def execute():
 
 def window():
     windowName = "shading_importer"
-    windowSize = (400, 250)
+    windowSize = (400, 210)
     buttonSize = (100, 30)
 
     if (cmds.window(windowName , exists=True)):
@@ -135,8 +135,7 @@ def window():
     cmds.text(label='HOW TO USE:')
     cmds.text(label='1. reference in animation (.abc)')
     cmds.text(label='2. reference in published shading (.ma)')
-    cmds.text(label='3. set appropriate amount of namespaces [usually 1]')
-    cmds.text(label='4. select top level transform of alembic')
+    cmds.text(label='3. select top level transform of alembic')
 
     cmds.separator( height=20, style='double' )
     
