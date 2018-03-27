@@ -25,12 +25,11 @@ def apply_curve_attributes(shape_node, shading_json, shape_namespace, shaders_na
         else:
             cmds.setAttr(shape_namespace + shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
 
-def apply_shaders(shape_node, shading_json, namespace):
-    
+def apply_shaders(shape_node, shading_json, object_namespace, shader_namespace):
     for i in shading_json[shape_node]["shaders"]:
         for j in range(0, len(shading_json[shape_node]["shaders"][i])):
-            cmds.select(namespace + str(shading_json[shape_node]["shaders"][i][j]), replace=True)
-            cmds.hyperShade(assign = namespace + str(i))
+            cmds.select(object_namespace + str(shading_json[shape_node]["shaders"][i][j]), replace=True)
+            cmds.hyperShade(assign = shader_namespace + str(i))
 
 
 
@@ -66,8 +65,7 @@ def execute():
     bool_apply_arnold_attributes = False
     bool_apply_shaders = False
 
-    shaders_namespace_cnt = cmds.intSliderGrp('slider_shaders_namespaces', query = True, value = True)
-    shaders_namespace = "*:" * shaders_namespace_cnt
+    shaders_namespace = cmds.optionMenu('shader_namespace_input', query=True, value=True) + str(":")
 
     object_in_namespace = ""
 
@@ -105,7 +103,7 @@ def execute():
             
             if bool_apply_shaders:
                 if (datatype != "nurbsCurve"):
-                    apply_shaders(shape_namespace_stripped, shading_json, shaders_namespace)
+                    apply_shaders(shape_namespace_stripped, shading_json, object_namespace, shaders_namespace)
                 print "SHADERS APPLIED >>", shape
 
     """
@@ -143,7 +141,14 @@ def window():
     cmds.separator( height=20, style='double' )
     
     cmds.columnLayout( "mainColumn", adj=True )
-    cmds.intSliderGrp('slider_shaders_namespaces', field=True, label='shaders_namespaces', minValue=0, maxValue=3, fieldMinValue=0, fieldMaxValue=10, value=1)
+  
+    cmds.optionMenu('shader_namespace_input', label='shader_namespace')
+    cmds.namespace(setNamespace=':')
+    namespaces = cmds.namespaceInfo(listOnlyNamespaces=True, recurse=True)
+
+    for i in namespaces:
+        if "hading" in i:
+            cmds.menuItem(label=i)
 
     cmds.separator( height=20, style='double' )
 
