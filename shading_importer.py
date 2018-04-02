@@ -14,6 +14,7 @@ def apply_attributes(shape_node, shading_json, namespace):
         cmds.setAttr(namespace + shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
 
 
+
 def apply_curve_attributes(shape_node, shading_json, shape_namespace, shaders_namespace):
 
     for i in shading_json[shape_node]["arnold_attributes"]:

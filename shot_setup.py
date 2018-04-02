@@ -40,9 +40,9 @@ def create_custom_aovs(char):
         customAOVlist = ["mask_lips", "mask_lips_smear", "mask_tattoo", "mask_makeup_graphic", "mask_makeup_graphic_sharp", "mask_eyebrows", "mask_facing_ratio"]
     elif char == "man":
         customAOVlist = []
-    elif char == "transvestite":
-        customAOVlist = []
-    elif char == "manager":
+    elif char == "transgender":
+        customAOVlist = ["mask_trans_graphic_skirt", "mask_trans_beard", "mask_trans_ears", "mask_trans_glitter", "mask_trans_eyes_red", "mask_trans_lips"]
+    elif char == "vladimir":
         customAOVlist = []
     
     currentAOVlist = aovs.AOVInterface().getAOVNodes(names=True)
@@ -74,10 +74,19 @@ def execute():
         create_default_aovs()
         print "DEFAULT AOVS COMPLETE"
 
-    if (cmds.checkBox("checkbox_create_custom_aovs", query = True, value = True)):
+    if (cmds.checkBox("checkbox_create_custom_aovs_girl", query = True, value = True)):
         create_custom_aovs("girl")
-        print "CUSTOM AOVS COMPLETE"
+        print "CUSTOM AOVS GIRL COMPLETE"
 
+    if (cmds.checkBox("checkbox_create_custom_aovs_transgender", query = True, value = True)):
+        create_custom_aovs("transgender")
+        print "CUSTOM AOVS TRANSGENDER COMPLETE"
+
+    """
+    if (cmds.checkBox("checkbox_create_custom_aovs_man", query = True, value = True)):
+        create_custom_aovs("man")
+        print "CUSTOM AOVS MAN COMPLETE"
+    """
 
 
 def window():
@@ -93,9 +102,9 @@ def window():
     cmds.columnLayout( "mainColumn", adj=True )
     cmds.checkBox("checkbox_set_render_settings", height=buttonSize[1], label = "set_render_settings", value = 0, parent = "mainColumn")
     cmds.checkBox("checkbox_create_default_aovs", height=buttonSize[1], label = "create_default_aovs", value = 0, parent = "mainColumn")
-    cmds.checkBox("checkbox_create_custom_aovs", height=buttonSize[1], label = "create_custom_aovs", value = 0, parent = "mainColumn")
-    # cmds.checkBox("checkbox_create_curvecollectors_boots", height=buttonSize[1], label = "create_curvecollectors_boots", value = 0, parent = "mainColumn")
-    # cmds.checkBox("checkbox_create_curvecollectors_bra", height=buttonSize[1], label = "create_curvecollectors_bra", value = 0, parent = "mainColumn")
+    cmds.checkBox("checkbox_create_custom_aovs_girl", height=buttonSize[1], label = "create_custom_aovs_girl", value = 0, parent = "mainColumn")
+    cmds.checkBox("checkbox_create_custom_aovs_trans", height=buttonSize[1], label = "create_custom_aovs_trans", value = 0, parent = "mainColumn")
+    """cmds.checkBox("checkbox_create_custom_aovs_man", height=buttonSize[1], label = "create_custom_aovs_man", value = 0, parent = "mainColumn")"""
     cmds.button( label='Execute', height=buttonSize[1], parent = "mainColumn", command=("execute()"))
 
 

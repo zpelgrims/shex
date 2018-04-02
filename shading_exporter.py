@@ -85,9 +85,9 @@ def get_arnold_attributes(shape_name, default_arnold_attributes):
     arnold_attribute_names.append("castsShadows")
     arnold_attribute_names.append("smoothShading")
 
-
     arnold_attributes = []
     non_default_arnold_attributes = {}
+    changed_attributes_count = 0
 
     for i in arnold_attribute_names:
         arnold_attributes.append( (str(i), cmds.getAttr(shape_name + "." + i)) )
@@ -95,13 +95,16 @@ def get_arnold_attributes(shape_name, default_arnold_attributes):
     # amount of attributes needs to be equal
     if len(arnold_attribute_names) == len(default_arnold_attributes):
         for i in range (0, len(arnold_attributes)):
-            
             # attribute names need to be equal
             if arnold_attributes[i][0] == default_arnold_attributes[i][0]:
                 # if attribute value changed
                 if arnold_attributes[i][1] != default_arnold_attributes[i][1]:
                     non_default_arnold_attributes[str(arnold_attributes[i][0])] = arnold_attributes[i][1]
-                    print shape_name, " >> (", arnold_attributes[i][0], ", ", arnold_attributes[i][1], ")"
+                    changed_attributes_count += 1
+                    print "-->> (", arnold_attributes[i][0], ", ", arnold_attributes[i][1], ")"
+
+    if changed_attributes_count == 0:
+        print "-->> No adjusted attributes for this shape"
 
     return non_default_arnold_attributes
 
@@ -120,7 +123,7 @@ def get_arnold_hair_attributes(shape_name):
     
     for i in range (0, len(arnold_attributes)):
         non_default_arnold_attributes[str(arnold_attributes[i][0])] = arnold_attributes[i][1]
-        print shape_name, " >> (", arnold_attributes[i][0], ", ", arnold_attributes[i][1], ")"
+        print "-->> (", arnold_attributes[i][0], ", ", arnold_attributes[i][1], ")"
 
     return non_default_arnold_attributes
 
@@ -132,6 +135,7 @@ def get_arnold_curve_attributes(shape_name, default_arnold_attributes):
     arnold_attribute_names.append("castsShadows")
     arnold_attributes = []
     non_default_arnold_attributes = {}
+    changed_attributes_count = 0
 
     # if shader is connected to curvewidth, do not add the aiCurveWidth attribute.. once it is locked can't overwrite it with value
     curve_width_export = False
@@ -153,12 +157,14 @@ def get_arnold_curve_attributes(shape_name, default_arnold_attributes):
                         if (arnold_attributes[i][0] == "aiCurveWidth") and (curve_width_export == False):
                             continue
                         non_default_arnold_attributes[str(arnold_attributes[i][0])] = arnold_attributes[i][1]
-                        print shape_name, " >> (", arnold_attributes[i][0], ", ", arnold_attributes[i][1], ")"
+                        changed_attributes_count += 1
+                        print "-->> (", arnold_attributes[i][0], ", ", arnold_attributes[i][1], ")"
+
+    if changed_attributes_count == 0:
+        print "-->> No adjusted attributes for this shape"
 
     # add curve shader and width
     non_default_arnold_attributes["curve_shader"] = cmds.listConnections(shape_name + ".aiCurveShader")
-
-    
     non_default_arnold_attributes["curve_width"] = cmds.listConnections(shape_name + ".aiCurveWidth")
 
     return non_default_arnold_attributes
@@ -256,6 +262,8 @@ def export_shading_json():
         # query data type
         datatype = str(cmds.objectType(shape))
 
+        print shape + ": "
+
         if datatype == "mesh":
             object_data[str(shape_namespace_stripped)] = {"shaders": get_shaders(shape, current_namespace), "arnold_attributes": get_arnold_attributes(shape, default_arnold_mesh_attributes)}
         elif datatype == "xgmSplineDescription":
@@ -264,7 +272,6 @@ def export_shading_json():
             object_data[str(shape_namespace_stripped)] = {"arnold_attributes": get_arnold_curve_attributes(shape, default_arnold_curve_attributes)}
 
     filename = str(cmds.fileDialog2(fileFilter="*.json", dialogStyle=2)[0])
-    print "filename: ", filename
 
     # Write JSON file
     with io.open(filename, 'w', encoding='utf8') as outfile:
