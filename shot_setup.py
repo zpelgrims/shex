@@ -41,7 +41,7 @@ def create_custom_aovs(char):
     elif char == "man":
         customAOVlist = []
     elif char == "transgender":
-        customAOVlist = ["mask_trans_graphic_skirt", "mask_trans_beard", "mask_trans_ears", "mask_trans_glitter", "mask_trans_eyes_red", "mask_trans_lips"]
+        customAOVlist = ["mask_trans_graphic_skirt", "mask_trans_beard", "mask_trans_ears", "mask_trans_glitter", "mask_trans_eyes_red", "mask_trans_lips", "mask_trans_ass_text"]
     elif char == "vladimir":
         customAOVlist = []
     
