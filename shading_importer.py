@@ -2,6 +2,7 @@ import maya.cmds as cmds
 import json
 import pymel.core as pm
 
+
 def load_json():
 
     filename = str(cmds.fileDialog2(fileFilter="*.json", fileMode=1, dialogStyle=1)[0])
@@ -9,14 +10,11 @@ def load_json():
 
 
 def apply_attributes(shape_node, shading_json, namespace):
-
     for i in shading_json[shape_node]["arnold_attributes"]:
         cmds.setAttr(namespace + shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
 
 
-
 def apply_curve_attributes(shape_node, shading_json, shape_namespace, shaders_namespace):
-
     for i in shading_json[shape_node]["arnold_attributes"]:
         if (i == "curve_shader"):
             cmds.connectAttr(shaders_namespace + shading_json[shape_node]["arnold_attributes"][i][0] + ".outColor", shape_namespace + shape_node + ".aiCurveShader", force=True)
@@ -26,13 +24,12 @@ def apply_curve_attributes(shape_node, shading_json, shape_namespace, shaders_na
         else:
             cmds.setAttr(shape_namespace + shape_node + "." + i, shading_json[shape_node]["arnold_attributes"][i])
 
+
 def apply_shaders(shape_node, shading_json, object_namespace, shader_namespace):
     for i in shading_json[shape_node]["shaders"]:
         for j in range(0, len(shading_json[shape_node]["shaders"][i])):
             cmds.select(object_namespace + str(shading_json[shape_node]["shaders"][i][j]), replace=True)
             cmds.hyperShade(assign = shader_namespace + str(i))
-
-
 
 
 def get_shapes():

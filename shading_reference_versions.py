@@ -1,5 +1,7 @@
 import maya.cmds as cmds
 import os
+from os import listdir
+from os.path import isfile, join
 import re
 
     
@@ -9,7 +11,7 @@ def get_reference_version(reference_name):
     folder_path_list = reference_path.rsplit('/', -1)
     full_folder_path = ""
     
-    for k in range(0, len(folder_path) - 1):
+    for k in range(0, len(folder_path_list) - 1):
         full_folder_path += folder_path_list[k] + "/"
     
     reference_name = reference_path.rsplit('/', 1)[-1]
@@ -65,12 +67,16 @@ def window():
     reference_list = cmds.ls(references=True)
     
     for i in reference_list:
+
+        # filter out non-shading references
+        if "had" not in i:
+            continue
+
         reference_version = get_reference_version(i)
         folder_latest_version = get_folder_latest_version(reference_version[1])      
 
             
         if reference_version[0] < folder_latest_version:
-            print str(i) + ": Outdated" + " ----> " + "version " + str(reference_stripped_version_number) + " < " + str(folder_latest_version) 
             cmds.button( label=i, enable=False, bgc=[1, .2, .2] )
         else:
             cmds.button( label=i, enable=False, bgc=[0, 1, .5])
