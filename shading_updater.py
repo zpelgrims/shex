@@ -13,7 +13,8 @@ from functools import partial
 
 
 def get_top_level_grp(reference_name):
-
+    print "reference_name: ", reference_name
+    print "textfield query: ", cmds.textField("textfield_name_" + reference_name, query=True, text=True)
     return cmds.textField("textfield_name_" + reference_name, query=True, text=True)
 
 
@@ -73,10 +74,10 @@ def get_shapes(top_level_group):
         return cleaned_shapes_list
 
 
-def apply_json(shaders_namespace, top_level_group):
+def apply_json(shaders_namespace, *args):
 
     shading_json = load_json()
-    shapes_list = get_shapes(top_level_group)
+    shapes_list = get_shapes(get_top_level_grp(shaders_namespace))
 
     bool_apply_arnold_attributes = True
     bool_apply_shaders = True
@@ -156,7 +157,7 @@ def get_reference_version(reference_name):
 
 def get_folder_latest_version(full_folder_path, filetype):
     
-    # get all .ma files in folder
+    # get all files in folder
     folder_maya_files_list = [f for f in listdir(full_folder_path) if isfile(join(full_folder_path, f)) and f.endswith(filetype)]
 
     folder_latest_file_version = 0
@@ -187,17 +188,13 @@ def reload_reference(reference_name, latest_version_path, *args):
     cmds.file(cleanReference=reference_name)
     cmds.file(latest_version_path, loadReference=reference_name)
     
-    apply_json(reference_name, get_top_level_grp(reference_name))
     window()
 
 
 def replace_reference(reference_name, latest_version_path, *args):
 
     cmds.file(latest_version_path, loadReference=reference_name)
-
-    apply_json(reference_name, get_top_level_grp(reference_name))
     window()
-
 
 
 def window():
@@ -205,13 +202,13 @@ def window():
     windowName = "shading_reference_versions"
     windowSize = (600, 300)
     buttonSize = (100, 20)
-    spacing = [(1,20), (2,20), (3,20), (4,20), (5,20), (6,20)]
+    spacing = [(1,10), (2,10), (3,10), (4,10), (5,10), (6,10), (7, 10)]
 
 
     if (cmds.window(windowName , exists=True)):
         cmds.deleteUI(windowName)
     window = cmds.window( windowName, title= windowName, sizeable=True)
-    cmds.rowColumnLayout( numberOfColumns=6, columnWidth=[(1, 200), (2, 300), (3, 50), (4, 50), (5, 150), (6, 150)], rowSpacing=spacing, columnSpacing=spacing)
+    cmds.rowColumnLayout( numberOfColumns=7, columnWidth=[(1, 200), (2, 300), (3, 50), (4, 50), (5, 150), (6, 150), (7, 100)], rowSpacing=spacing, columnSpacing=spacing)
     
     
     cmds.text( label="Alembic cache top level node", align='center' )
@@ -220,6 +217,16 @@ def window():
     cmds.text( label="Latest", align='right' )
     cmds.text( label="Keep edits", align='center' )
     cmds.text( label="Lose edits", align='center' )
+    cmds.text( label="Apply .json", align='center' )
+
+    cmds.separator()
+    cmds.separator()
+    cmds.separator()
+    cmds.separator()
+    cmds.separator()
+    cmds.separator()
+    cmds.separator()
+
     
     reference_list = cmds.ls(references=True)
     
@@ -249,6 +256,7 @@ def window():
 
         cmds.button( label="Replace and Update", enable=True, command=partial(replace_reference, i, folder_latest_version[1]))
         cmds.button( label="Reload and Update", enable=True, command=partial(reload_reference, i, folder_latest_version[1]))
+        cmds.button( label="Apply .json", enable=True, command=partial(apply_json, i))
 
 
     cmds.showWindow( windowName )
