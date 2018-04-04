@@ -187,10 +187,7 @@ def reload_reference(reference_name, latest_version_path, *args):
     cmds.file(cleanReference=reference_name)
     cmds.file(latest_version_path, loadReference=reference_name)
     
-    # assign json
     apply_json(reference_name, get_top_level_grp(reference_name))
-
-    # update window
     window()
 
 
@@ -198,10 +195,7 @@ def replace_reference(reference_name, latest_version_path, *args):
 
     cmds.file(latest_version_path, loadReference=reference_name)
 
-    # assign json
     apply_json(reference_name, get_top_level_grp(reference_name))
-
-    # update window
     window()
 
 
@@ -257,14 +251,10 @@ def window():
         cmds.button( label="Reload and Update", enable=True, command=partial(reload_reference, i, folder_latest_version[1]))
 
 
-
-
-
     cmds.showWindow( windowName )
 
     gMainWindow = maya.mel.eval('$tmpVar=$gMainWindow')
     cmds.window( windowName, edit=True )
-
 
 
 window()
